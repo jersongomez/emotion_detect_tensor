@@ -1,0 +1,67 @@
+name: emotion_detect_tensor
+description: A new Flutter project.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^0.1.2
+  tflite: ^1.0.5
+  camera: ^0.5.7+4
+  video_player: ^0.10.9+1
+  speech_to_text: ^2.1.0
+  cloud_firestore: ^0.13.5
+  flutter_bloc: ^4.0.0
+  equatable: ^1.1.1
+  meta: ^1.1.8
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/model_100.tflite
+    - assets/labels_100.txt
+    - assets/11.mp4
+    - assets/21.mp4
+    - assets/31.mp4
+    - assets/41.mp4
+
+  
+  
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
