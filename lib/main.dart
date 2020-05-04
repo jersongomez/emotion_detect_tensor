@@ -1,12 +1,14 @@
-import 'package:emotion_detect_tensor/bloc/simple_bloc_delegate.dart';
-import 'package:emotion_detect_tensor/ui/app.dart';
+import 'package:emotion_detect_tensor/ui/detect_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
-  //WidgetsFlutterBinding.ensureInitialized();
-  BlocSupervisor.delegate = SimpleBlocDelegate();
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: Colors.pinkAccent,
+    ),
+  );
   runApp(MyApp());
 }
 
@@ -21,9 +23,22 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Interview face control',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.pink,
+        appBarTheme: AppBarTheme(
+          color: Colors.pinkAccent,
+          textTheme: TextTheme(
+            title: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w300,
+              fontSize: 20.0,
+            ),
+          ),
+        ),
+        iconTheme: IconThemeData(
+          color: Colors.pinkAccent,
+        ),
       ),
-      home: App(),
+      home: DetectScreen(),
     );
   }
 }

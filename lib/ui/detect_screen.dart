@@ -2,18 +2,14 @@ import 'package:emotion_detect_tensor/helpers/app_helper.dart';
 import 'package:emotion_detect_tensor/helpers/camera.dart';
 import 'package:emotion_detect_tensor/helpers/tflite.dart';
 import 'package:emotion_detect_tensor/models/result.dart';
-import 'package:emotion_detect_tensor/repo/repository.dart';
 import 'package:emotion_detect_tensor/ui/recording_part.dart';
 import 'package:flutter/material.dart';
+import 'package:video_box/video.controller.dart';
+import 'package:video_box/video_box.dart';
 import 'package:video_player/video_player.dart';
 
 class DetectScreen extends StatefulWidget {
-  DetectScreen({Key key, this.title, this.videoAssets, this.repository})
-      : super(key: key);
-
-  final String title;
-  final String videoAssets;
-  final Repository repository;
+  DetectScreen({Key key}) : super(key: key);
 
   @override
   _DetectScreenState createState() => _DetectScreenState();
@@ -21,7 +17,14 @@ class DetectScreen extends StatefulWidget {
 
 class _DetectScreenState extends State<DetectScreen> {
   List<Result> outputs;
-  VideoPlayerController _controller;
+  ScrollController controller = ScrollController();
+  List<VideoController> vcs = [];
+  List<String> videosAssets = [
+    'assets/11.mp4',
+    'assets/21.mp4',
+    'assets/31.mp4',
+    'assets/41.mp4'
+  ];
   String faceList = "";
 
   @override
@@ -47,8 +50,10 @@ class _DetectScreenState extends State<DetectScreen> {
           outputs = value;
 
           outputs.forEach((Result out) {
-            faceList +=
-                out.id.toString() + ":" + out.confidence.toString() + "/";
+            faceList += out.id.toString() +
+                ":" +
+                out.confidence.toStringAsFixed(5) +
+                "/";
           });
 
           //Update results on screen
@@ -62,33 +67,37 @@ class _DetectScreenState extends State<DetectScreen> {
           AppHelper.log("listen", error);
         });
 
-    // VideoPlayer Configuration
-    _controller = VideoPlayerController.asset(widget.videoAssets)
-      ..initialize().then((_) {
-        setState(() {});
-      });
+    // Video Configuration
+    for (var video in videosAssets) {
+      vcs.add(VideoController(source: VideoPlayerController.asset(video))
+        ..initialize());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text('Interview face control'),
       ),
       body: FutureBuilder<void>(
         future: Camera.initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             // If the Future is complete, display the preview.
-            return SingleChildScrollView(
-                child: Column(
+            return ListView(
+              controller: controller,
               children: <Widget>[
-                Recording(
-                  faceList: faceList,
-                  repo: widget.repository,
-                )
+                for (var vc in vcs)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: AspectRatio(
+                      aspectRatio: 1/1,
+                      child: VideoBox(controller: vc),
+                    ),
+                  ),
               ],
-            ));
+            );
           } else {
             // Otherwise, display a loading indicator.
             return Center(child: CircularProgressIndicator());
@@ -100,50 +109,14 @@ class _DetectScreenState extends State<DetectScreen> {
 
   @override
   void dispose() {
-    TFLite.disposeModel();
+    //TFLite.disposeModel();
     Camera.camera.dispose();
     AppHelper.log("dispose", "Clear resources.");
-    _controller.dispose();
-    super.dispose();
-  }
 
-  Widget showVideo() {
-    return Stack(
-      alignment: AlignmentDirectional.bottomCenter,
-      children: <Widget>[
-        _controller.value.initialized
-            ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
-              )
-            : Container(),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: RaisedButton(
-            onPressed: () {
-              setState(() {
-                _controller.value.isPlaying
-                    ? _controller.pause()
-                    : _controller.play();
-              });
-            },
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Icon(
-                  _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
-                ),
-                Text(
-                  _controller.value.isPlaying ? 'Pausar Video' : 'Play Video',
-                  style: TextStyle(color: Colors.white),
-                )
-              ],
-            ),
-            color: Colors.orange,
-          ),
-        ),
-      ],
-    );
+    // Video dispose
+    for (var vc in vcs) {
+      vc.dispose();
+    }
+    super.dispose();
   }
 }

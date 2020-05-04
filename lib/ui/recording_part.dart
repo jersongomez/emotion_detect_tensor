@@ -1,24 +1,16 @@
-import 'package:emotion_detect_tensor/helpers/app_helper.dart';
-import 'package:emotion_detect_tensor/helpers/camera.dart';
-import 'package:emotion_detect_tensor/helpers/tflite.dart';
 import 'package:emotion_detect_tensor/repo/repository.dart';
-import 'package:emotion_detect_tensor/ui/save_data.dart';
+import 'package:emotion_detect_tensor/repo/sentiment_analisys.dart';
+import 'package:emotion_detect_tensor/ui/bye.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:emotion_detect_tensor/bloc/info_bloc.dart';
-import 'package:video_player/video_player.dart';
 
 class Recording extends StatefulWidget {
-  Recording({Key key, this.faceList, this.repo,
-    this.videoPlayerController}) 
+  Recording({Key key, this.faceList}) 
     : super(key: key);
 
   final String faceList;
-  final Repository repo;
-  final VideoPlayerController videoPlayerController;
 
   @override
   _RecordingState createState() => _RecordingState();
@@ -35,6 +27,9 @@ class _RecordingState extends State<Recording> {
   String _currentLocaleId = "";
   List<LocaleName> _localeNames = [];
   final SpeechToText speech = SpeechToText();
+
+  final Repository repository = Repository();
+  SentimentAnalisys sentimentAnalisys;
 
   @override
   void initState() {
@@ -103,10 +98,8 @@ class _RecordingState extends State<Recording> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        FloatingActionButton(
-                          heroTag: "btnPlay",
+                        FlatButton(
                           child: Icon(Icons.play_arrow),
-                          backgroundColor: Colors.green,
                           onPressed: !_hasSpeech || speech.isListening
                               ? null
                               : startListening,
@@ -178,12 +171,16 @@ class _RecordingState extends State<Recording> {
               ],
             ),
             onPressed: lastWords.isEmpty ? null : (){
-              TFLite.disposeModel();
-              Camera.camera.dispose();
-              AppHelper.log("dispose", "Clear resources.");
-              widget.videoPlayerController.dispose();
-              widget.repo.addNewInfo(widget.faceList, lastWords);
+              sentimentAnalisys = SentimentAnalisys(lastWords.substring(0, lastWords.indexOf('-')-1));
+              String sentimentDetected = sentimentAnalisys.sentimentAnalisys();
+              repository.addNewInfo(widget.faceList, lastWords, sentimentDetected);
               Navigator.of(context).pop();
+              Navigator.push(context, 
+                MaterialPageRoute(
+                  builder: (context) {
+                    return Bye();
+                  }
+                ));
             }
           ),
         ),
@@ -191,7 +188,6 @@ class _RecordingState extends State<Recording> {
       ],
     );
   }
-
 
   void changeStatusForStress(String status) {
     if (!_stressTest) {
@@ -241,7 +237,6 @@ class _RecordingState extends State<Recording> {
   void resultListener(SpeechRecognitionResult result) {
     setState(() {
       lastWords = "${result.recognizedWords} - ${result.finalResult}";
-      print(lastWords);
     });
   }
 

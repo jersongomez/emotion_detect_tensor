@@ -61,11 +61,7 @@ class App extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (context) {
-                return DetectScreen(
-                  title: text.substring(text.indexOf("\n") +2), 
-                  videoAssets: videoURL,
-                  repository: repository,
-                );
+                return DetectScreen();
               }),
             );
           },
