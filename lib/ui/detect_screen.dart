@@ -51,7 +51,7 @@ class _DetectScreenState extends State<DetectScreen> {
           outputs = value;
 
           outputs.forEach((Result out) {
-            faceList += out.id.toString() +
+            faceData = out.id.toString() +
                 ":" +
                 out.confidence.toStringAsFixed(3) +
                 "/";
@@ -72,7 +72,7 @@ class _DetectScreenState extends State<DetectScreen> {
     for (var video in videosAssets) {
       vcs.add(VideoController(source: VideoPlayerController.asset(video))
         ..initialize()
-        //..addListener(holiboli)
+        ..addListener(holiboli)
         );
     }
   }
@@ -80,11 +80,9 @@ class _DetectScreenState extends State<DetectScreen> {
   holiboli(VideoController vc) {
     if (vc.value.position.inSeconds == 1) {
       faceList += vc.value.dataSource.substring(vc.value.dataSource.indexOf('/'));
-      print('PANDA -> ' + faceList);
     }
     if (vc.value.position < vc.value.duration) {
       faceList += faceData;
-      print('PANDA faceList en cada second ' + faceList);
     }
   }
 
