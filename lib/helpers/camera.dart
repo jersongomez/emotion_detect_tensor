@@ -7,7 +7,7 @@ class Camera {
   static CameraController camera;
 
   static bool isDetecting = false;
-  static CameraLensDirection _direction = CameraLensDirection.back;
+  static CameraLensDirection _direction = CameraLensDirection.front;
   static Future<void> initializeControllerFuture;
 
   static Future<CameraDescription> _getCamera(CameraLensDirection dir) async {

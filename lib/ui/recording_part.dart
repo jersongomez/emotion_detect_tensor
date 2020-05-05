@@ -61,10 +61,17 @@ class _RecordingState extends State<Recording> {
           padding: const EdgeInsets.all(8.0),
           child: Card(
             child: Column(children: [
+              SizedBox(height: 10.0,),
               ListTile(
-                leading: Icon(Icons.mic),
-                title: Text('Registra tu respuesta aquí:'),
-                subtitle: Text('Inicializa, selecciona tu idioma y asegúrate de tener conexión a internet'),
+                leading: Icon(Icons.mic, size: 40,),
+                title: Text(
+                  'PREGUNTA: Háblame de un proyecto en equipo en que hayas trabajado.',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                subtitle: Text(
+                  'Registra tu respuesta aquí: \n Inicializa, selecciona tu idioma y asegúrate de tener conexión a internet',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                  ),
               ),
               Container(
                 child: Column(
@@ -99,15 +106,19 @@ class _RecordingState extends State<Recording> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         FlatButton(
-                          child: Icon(Icons.play_arrow),
+                          child: Row(
+                            children: <Widget>[
+                            Icon(Icons.play_arrow),
+                            Text('Play')]),
                           onPressed: !_hasSpeech || speech.isListening
                               ? null
                               : startListening,
                         ),
-                        FloatingActionButton(
-                          heroTag: "btnStop",
-                          child: Icon(Icons.stop),
-                          backgroundColor: Colors.red,
+                        FlatButton(
+                          child: Row(
+                            children: <Widget>[
+                            Icon(Icons.stop),
+                            Text('Stop')]),
                           onPressed: speech.isListening ? stopListening : null,
                         ),
                       ],
@@ -143,26 +154,34 @@ class _RecordingState extends State<Recording> {
                   ),
                 ),
               ),
-              Container(
-                color: Theme.of(context).backgroundColor,
-                child: Center(
-                  child: speech.isListening
-                      ? Text(
-                          "Estoy escuchando...",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )
-                      : Text(
-                          'No estoy escuchando',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    color: Theme.of(context).backgroundColor,
+                    child: Center(
+                      child: speech.isListening
+                          ? Text(
+                              "Estoy escuchando...",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          : Text(
+                              'No estoy escuchando',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                    ),
+                  ),
+                ],
               ),
+              SizedBox(height: 10.0,)
             ]),
           ),
         ),
         Padding(
           padding: EdgeInsets.all(15.0),
           child: RaisedButton(
+            color: Colors.amber,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -171,15 +190,13 @@ class _RecordingState extends State<Recording> {
               ],
             ),
             onPressed: lastWords.isEmpty ? null : (){
-              sentimentAnalisys = SentimentAnalisys(lastWords.substring(0, lastWords.indexOf('-')-1));
+              sentimentAnalisys = SentimentAnalisys(lastWords);
               String sentimentDetected = sentimentAnalisys.sentimentAnalisys();
               repository.addNewInfo(widget.faceList, lastWords, sentimentDetected);
               Navigator.of(context).pop();
               Navigator.push(context, 
                 MaterialPageRoute(
-                  builder: (context) {
-                    return Bye();
-                  }
+                  builder: (context) => Bye()
                 ));
             }
           ),
@@ -236,7 +253,7 @@ class _RecordingState extends State<Recording> {
 
   void resultListener(SpeechRecognitionResult result) {
     setState(() {
-      lastWords = "${result.recognizedWords} - ${result.finalResult}";
+      lastWords = "${result.recognizedWords}";// - ${result.finalResult}";
     });
   }
 

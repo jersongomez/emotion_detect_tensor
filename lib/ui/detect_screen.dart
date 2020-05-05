@@ -26,6 +26,7 @@ class _DetectScreenState extends State<DetectScreen> {
     'assets/41.mp4'
   ];
   String faceList = "";
+  String faceData = "";
 
   @override
   void initState() {
@@ -52,7 +53,7 @@ class _DetectScreenState extends State<DetectScreen> {
           outputs.forEach((Result out) {
             faceList += out.id.toString() +
                 ":" +
-                out.confidence.toStringAsFixed(5) +
+                out.confidence.toStringAsFixed(3) +
                 "/";
           });
 
@@ -70,7 +71,20 @@ class _DetectScreenState extends State<DetectScreen> {
     // Video Configuration
     for (var video in videosAssets) {
       vcs.add(VideoController(source: VideoPlayerController.asset(video))
-        ..initialize());
+        ..initialize()
+        //..addListener(holiboli)
+        );
+    }
+  }
+
+  holiboli(VideoController vc) {
+    if (vc.value.position.inSeconds == 1) {
+      faceList += vc.value.dataSource.substring(vc.value.dataSource.indexOf('/'));
+      print('PANDA -> ' + faceList);
+    }
+    if (vc.value.position < vc.value.duration) {
+      faceList += faceData;
+      print('PANDA faceList en cada second ' + faceList);
     }
   }
 
@@ -89,13 +103,27 @@ class _DetectScreenState extends State<DetectScreen> {
               controller: controller,
               children: <Widget>[
                 for (var vc in vcs)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12.0),
-                    child: AspectRatio(
-                      aspectRatio: 1/1,
-                      child: VideoBox(controller: vc),
-                    ),
+                  Column(
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text('Estado del video: '),
+                      vc.value.duration == vc.value.position
+                      ? Row(children: <Widget>[Icon(Icons.check_circle, color: Colors.green,), Text('Hecho')],) 
+                      : Row(children: <Widget>[Icon(Icons.error, color: Colors.red,), Text('Falta')],),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12.0),
+                        child: AspectRatio(
+                          aspectRatio: 1/1,
+                          child: VideoBox(controller: vc),
+                        ),
+                      ),
+                    ],
                   ),
+                Recording(faceList: faceList)
               ],
             );
           } else {
